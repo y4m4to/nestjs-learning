@@ -9,10 +9,7 @@ export default new DataSource({
   password: 'password',
   entities: ['dist/**/entities/**/*.entity.js'],
   migrations: ['dist/**/migrations/**/*.js'],
-
-  // ログを出力するかどうか
   logging: true,
-
   /**
    * @note
    * synchronize は開発時にのみ使用する。
