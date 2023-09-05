@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -11,7 +15,11 @@ export class UsersService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  async create({ name }: CreateUserDto) {
+  /**
+   * ユーザーを作成する
+   * @returns 作成したユーザーの情報
+   */
+  async create({ name }: CreateUserDto): Promise<User> {
     return await this.userRepository.save({ name }).catch((err) => {
       throw new InternalServerErrorException(
         `[${err.message}]: ユーザーの登録に失敗しました。`,
@@ -19,19 +27,32 @@ export class UsersService {
     });
   }
 
-  findAll() {
-    return `This action returns all users`;
+  /**
+   * ユーザーの一覧を取得する
+   * @returns ユーザーの一覧
+   */
+  async findAll(): Promise<User[]> {
+    return await this.userRepository.find().catch((err) => {
+      throw new InternalServerErrorException(
+        `[${err.message}]: ユーザーの取得に失敗しました。`,
+      );
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  /**
+   * 指定したIDのユーザーを取得する
+   * @returns 指定したIDのユーザー
+   */
+  async findOne(id: number): Promise<User> {
+    return this.userRepository
+      .findOne({
+        where: { id },
+      })
+      .then((res) => {
+        if (!res) {
+          throw new NotFoundException();
+        }
+        return res;
+      });
   }
 }
