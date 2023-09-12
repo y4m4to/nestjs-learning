@@ -1,6 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { DeleteResult, Repository } from "typeorm";
 import { UsersController } from "./users.controller";
 import { UsersService } from "./users.service";
 import { User } from "./entities/user.entity";
@@ -75,6 +75,68 @@ describe("UsersService", () => {
       });
 
       expect(service.findOne(3)).rejects.toEqual({
+        statusCode: 404,
+        message: "Not Found",
+      });
+    });
+  });
+
+  describe("update()", () => {
+    it("更新した結果のユーザー情報を返すこと", () => {
+      const dto: CreateUserDto = {
+        name: "太郎2",
+      };
+
+      const user: User = {
+        id: 1,
+        name: "太郎2",
+      };
+
+      jest.spyOn(service, "update").mockImplementation(async () => {
+        return user;
+      });
+
+      expect(service.update(1, dto)).resolves.toEqual(user);
+    });
+
+    it("存在しないIDを指定するとエラーを返すこと", () => {
+      jest.spyOn(service, "update").mockRejectedValue({
+        statusCode: 404,
+        message: "Not Found",
+      });
+
+      const dto: CreateUserDto = {
+        name: "太郎2",
+      };
+
+      expect(service.update(2, dto)).rejects.toEqual({
+        statusCode: 404,
+        message: "Not Found",
+      });
+    });
+  });
+
+  describe("remove()", () => {
+    it("削除結果を返すこと", () => {
+      const result: DeleteResult = {
+        raw: [],
+        affected: 1,
+      };
+
+      jest.spyOn(service, "remove").mockImplementation(async () => {
+        return result;
+      });
+
+      expect(service.remove(1)).resolves.toEqual(result);
+    });
+
+    it("存在しないIDを指定するとエラーを返すこと", () => {
+      jest.spyOn(service, "remove").mockRejectedValue({
+        statusCode: 404,
+        message: "Not Found",
+      });
+
+      expect(service.remove(2)).rejects.toEqual({
         statusCode: 404,
         message: "Not Found",
       });

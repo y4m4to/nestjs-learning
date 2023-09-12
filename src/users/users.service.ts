@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { DeleteResult, Repository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { User } from "./entities/user.entity";
@@ -54,5 +54,32 @@ export class UsersService {
         }
         return res;
       });
+  }
+
+  /**
+   * 指定したIDのユーザーを更新する
+   * @returns 更新したユーザーの情報
+   */
+  async update(id: number, createUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    user.name = createUserDto.name;
+    return await this.userRepository.save(user);
+  }
+
+  /**
+   * 指定したIDのユーザーを削除する
+   * @returns 削除した結果
+   */
+  async remove(id: number): Promise<DeleteResult> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return await this.userRepository.delete(user);
   }
 }
