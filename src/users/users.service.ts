@@ -57,6 +57,19 @@ export class UsersService {
   }
 
   /**
+   * 指定したnameのユーザーを取得する
+   * @returns 指定したnameのユーザー
+   */
+  async findOneByName(name: string): Promise<User | undefined> {
+    return this.userRepository.findOne({ where: { name } }).then((res) => {
+      if (!res) {
+        throw new NotFoundException();
+      }
+      return res;
+    });
+  }
+
+  /**
    * 指定したIDのユーザーを更新する
    * @returns 更新したユーザーの情報
    */
