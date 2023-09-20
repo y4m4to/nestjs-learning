@@ -19,12 +19,40 @@ export class UsersService {
    * ユーザーを作成する
    * @returns 作成したユーザーの情報
    */
-  async create({ name }: CreateUserDto): Promise<User> {
-    return await this.userRepository.save({ name }).catch((err) => {
-      throw new InternalServerErrorException(
-        `[${err.message}]: ユーザーの登録に失敗しました。`,
-      );
-    });
+  async create({
+    name,
+    email,
+    passwordHash,
+    failedLoginAttempts,
+    firstName,
+    lastName,
+    dob,
+    profliePicture,
+    roleId,
+    isActive,
+    emailVerifiedAt,
+    phone,
+  }: CreateUserDto): Promise<User> {
+    return await this.userRepository
+      .save({
+        name,
+        email,
+        passwordHash,
+        failedLoginAttempts,
+        firstName,
+        lastName,
+        dob,
+        profliePicture,
+        roleId,
+        isActive,
+        emailVerifiedAt,
+        phone,
+      })
+      .catch((err) => {
+        throw new InternalServerErrorException(
+          `[${err.message}]: ユーザーの登録に失敗しました。`,
+        );
+      });
   }
 
   /**
@@ -54,6 +82,19 @@ export class UsersService {
         }
         return res;
       });
+  }
+
+  /**
+   * 指定したnameのユーザーを取得する
+   * @returns 指定したnameのユーザー
+   */
+  async findOneByName(name: string): Promise<User | undefined> {
+    return this.userRepository.findOne({ where: { name } }).then((res) => {
+      if (!res) {
+        throw new NotFoundException();
+      }
+      return res;
+    });
   }
 
   /**
